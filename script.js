@@ -5,7 +5,7 @@ window.onload = function() {
     var canvas;
     var blockSize = 30;//sera la taille d'un block pour notre serpent
     var ctx;//a pour valeur le contexte
-    var delay = 1000;//va permettre de fixer un temps de rafraîchissement
+    var delay = 100;//va permettre de fixer un temps de rafraîchissement
     var kaa;//objet, instance de Snake
 
     init();
@@ -25,7 +25,8 @@ window.onload = function() {
     function refreshCanvas() {
 
         ctx.clearRect(0,0,canvas.width, canvas.height);//suppression du contexte
-        kaa.draw();//appel la méthode draw de l'objet kaa instancier de Snake)
+        kaa.draw();//appel la méthode draw de l'objet kaa instancier de Snake
+        kaa.advance();//fait avancer notre serpent, méthode du serpent
         setTimeout(refreshCanvas,delay);// fonction répétant refreshCanvas suivant la valeur delay
     }
 
@@ -48,6 +49,14 @@ window.onload = function() {
                 drawBlock(ctx,this.body[i])//appel à la fonction drawBlock sur chaque index du tableau this.body
             }
             ctx.restore(); //restaure le contexte précédent   
+        }
+
+        this.advance = function () {//fonction permettant de faire avancer le serpent, sera appelé dans la fonction refreshCanvas
+
+            var nextPosition = this.body[0].slice();//on fait une copie de l'index 0 ac la méthode slice stocké dans nextPosition([6,4])
+            nextPosition[0] += 1;//on ajoute 1 à l'index 0 de nextPosition ([7,4])
+            this.body.unshift(nextPosition);//on rajoute la valeur de nextPosition avec la méthode unshift ([[7,4],[6,4],[5,4],[4,4]])
+            this.body.pop();//supprime le dernier élèment de notre tableau
         }
     }
 }
