@@ -7,7 +7,11 @@ window.onload = function() {
     var ctx;//a pour valeur le contexte
     var delay = 100;//va permettre de fixer un temps de rafraîchissement
     var kaa;//objet, instance de Snake
-    var api;
+    var api;//objet, instance de Apple
+    var widthInBlocks = canvasWidth/blockSize;//permet de définir le contour du canvas en bloc
+    var heightInBlocks = canvasHeight/blockSize;
+
+
 
     init();
 
@@ -26,11 +30,17 @@ window.onload = function() {
 
     function refreshCanvas() {
 
-        ctx.clearRect(0,0,canvas.width, canvas.height);//suppression du contexte
-        kaa.draw();//appel la méthode draw de l'objet kaa instancier de Snake
-        api.draw();
         kaa.advance();//fait avancer notre serpent, méthode du serpent
-        setTimeout(refreshCanvas,delay);// fonction répétant refreshCanvas suivant la valeur delay
+        if(kaa.checkCollision()){
+
+        } 
+        else{
+            ctx.clearRect(0,0,canvas.width, canvas.height);//suppression du contexte
+            kaa.draw();//appel la méthode draw de l'objet kaa instancier de Snake
+            api.draw();
+            setTimeout(refreshCanvas,delay);// fonction répétant refreshCanvas suivant la valeur delay
+        } 
+        
     }
 
     function drawBlock(ctx, position) {//dessine un bloc, prend en argument le contexte et un tableau à 2 index... 
@@ -90,6 +100,30 @@ window.onload = function() {
                 this.direction = newDirection;               // ...la valuer retourné est -1 et nous ne rentrerons pas dans la condition
             }
 
+        }
+
+        this.checkCollision = function() {
+            var wallCollision = false;
+            var snakeCollision = false;
+            var head = this.body[0];
+            var rest = this.body.slice(1);
+            var headX = head[0];
+            var headY = head[1];
+            var maxX = widthInBlocks;
+            var minX = -1;
+            var maxY = heightInBlocks;
+            var minY = -1;
+
+            if(headX === maxX || headX === minX || headY === maxY || headY === minY){
+                    wallCollision = true;
+            } else {
+                for(var i = 0; i < rest.length; i++){
+                    if(headX === rest[i][0] && headY === rest[i][1]){
+                        snakeCollision = true;
+                    }
+                }
+            }
+            return wallCollision || snakeCollision;
         }
     }
 
