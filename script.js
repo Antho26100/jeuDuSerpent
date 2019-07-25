@@ -8,6 +8,8 @@ window.onload = function() {
     var delay = 100;//va permettre de fixer un temps de rafraîchissement
     var kaa;//objet, instance de Snake
     var api;
+    var widthInBlocks = canvasWidth/blockSize;
+    var heightInBlocks = canvasHeight/blockSize;
 
     init();
 
@@ -26,11 +28,17 @@ window.onload = function() {
 
     function refreshCanvas() {
 
-        ctx.clearRect(0,0,canvas.width, canvas.height);//suppression du contexte
-        kaa.draw();//appel la méthode draw de l'objet kaa instancier de Snake
-        api.draw();
         kaa.advance();//fait avancer notre serpent, méthode du serpent
-        setTimeout(refreshCanvas,delay);// fonction répétant refreshCanvas suivant la valeur delay
+        if(kaa.checkCollision()){
+
+        }
+        else{
+            ctx.clearRect(0,0,canvas.width, canvas.height);//suppression du contexte
+            kaa.draw();//appel la méthode draw de l'objet kaa instancier de Snake
+            api.draw();
+            setTimeout(refreshCanvas,delay);// fonction répétant refreshCanvas suivant la valeur delay
+        }
+        
     }
 
     function drawBlock(ctx, position) {//dessine un bloc, prend en argument le contexte et un tableau à 2 index... 
