@@ -91,6 +91,32 @@ window.onload = function() {
             }
 
         }
+
+        this.checkCollision = function() {//méthode permettant de savoir si il y a une collision
+            var wallCollision = false;
+            var snakeCollision = false;
+            var head = this.body[0];
+            var rest = this.body.slice(1);
+            var headX = head[0];
+            var headY = head[1];
+            var maxX = widthInBlocks - 1; //permet de définir un bloc maximum sur l'axe des abscisses
+            var minX = 0; // permet de définir un bloc minimum sur l'axe des abscisses
+            var maxY = heightInBlocks - 1; // idem pour les ordonnées
+            var minY = 0;
+            var isNotBetweenHorizontalWall = headX < minX || headX > maxX; //stocke dans cette variable la condition dans laquelle le serpent n'est pas entre les murs horizontaux
+            var isNotBetweenVerticalWall = headY < minY || headY > maxY; // pour les murs verticaux
+
+            if(isNotBetweenHorizontalWall || isNotBetweenVerticalWall){
+                    wallCollision = true;
+            }  
+            for(var i = 0; i < rest.length; i++){ //parcours du tableau rest correspondant au corps du serpent
+                if(headX === rest[i][0] && headY === rest[i][1]){ //si les pts x et y de notre serpent correspondent à ceux d'un des blocs du serpent, il y a snakeCollision
+                        snakeCollision = true;
+                }
+            }
+            
+            return wallCollision || snakeCollision;
+        }
     }
 
     function Apple (position){ // fonction constructeur de pomme, prend en paramètre une position sous frome de tableau
