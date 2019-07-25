@@ -7,6 +7,7 @@ window.onload = function() {
     var ctx;//a pour valeur le contexte
     var delay = 100;//va permettre de fixer un temps de rafraîchissement
     var kaa;//objet, instance de Snake
+    var api;
 
     init();
 
@@ -19,6 +20,7 @@ window.onload = function() {
         document.body.appendChild(canvas);//accroche le canvas au document  
         ctx = canvas.getContext('2d');//notre canvas doit posséder un contexte, ici en 2d
         kaa = new Snake ([[6,4],[5,4],[4,4]], "right");//instance de Snack avec en paramètre le corps du serpent
+        api = new Apple([10,10]);
         refreshCanvas();
     }
 
@@ -26,6 +28,7 @@ window.onload = function() {
 
         ctx.clearRect(0,0,canvas.width, canvas.height);//suppression du contexte
         kaa.draw();//appel la méthode draw de l'objet kaa instancier de Snake
+        api.draw();
         kaa.advance();//fait avancer notre serpent, méthode du serpent
         setTimeout(refreshCanvas,delay);// fonction répétant refreshCanvas suivant la valeur delay
     }
@@ -90,6 +93,23 @@ window.onload = function() {
         }
     }
 
+    function Apple (position){ // fonction constructeur de pomme, prend en paramètre une position sous frome de tableau
+        this.position = position;
+        this.draw = function() { 
+            ctx.save();
+            ctx.beginPath();
+            ctx.fillStyle = "#33cc33";
+            var radius = blockSize/2; //taille du rayon, soit la moitié d'un block
+            var x = position[0] * blockSize - radius;
+            var y = position[1] * blockSize - radius;
+            ctx.arc(x,y,radius,0,Math.PI*2,true);//méthode afin de créer un cercle
+            ctx.fill();
+            ctx.restore();
+
+        }
+
+    }
+
     document.onkeydown = function handleKeyDown(e) { //permet de récupérer un évènement clavier, ici quand l'utilisateur enfonce une touche, capturer dans "e"
         
         var key = e.keyCode;//on récupère le code de cette touche dans la variable key
@@ -105,7 +125,7 @@ window.onload = function() {
                 break;
             default: return;
         }
-        kaa.setDirection(newDirection);
+        kaa.setDirection(newDirection);//appel de la fonction setDirection de l'objet kaa
     }
 
 
