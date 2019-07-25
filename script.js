@@ -64,16 +64,36 @@ window.onload = function() {
                     break;
                 case "up": nextPosition[1] -= 1;
                     break;
+                default: throw("invalid Direction");
             }
             this.body.unshift(nextPosition);//on rajoute la valeur de nextPosition avec la méthode unshift ([[7,4],[6,4],[5,4],[4,4]])
             this.body.pop();//supprime le dernier élèment de notre tableau
+        };
+
+        this.setDirection = function (newDirection){// va permettre de régler une direction
+            var allowedDirection; //va stocker un tableau de directions autorisées à 2 index
+            switch(this.direction){
+                case "left": 
+                case "right": 
+                    allowedDirection = ["up","down"];
+                    break;
+                case "down":
+                case "up": 
+                    allowedDirection = ["right","left"];
+                    break;
+                default: throw("invalid Direction");
+            }
+            if(allowedDirection.indexOf(newDirection) > -1){ // la méthode indexOf premet de vérifier si une valeur est contenu dans un tableau, si elle ne l'est pas...
+                this.direction = newDirection;               // ...la valuer retourné est -1 et nous ne rentrerons pas dans la condition
+            }
+
         }
     }
 
     document.onkeydown = function handleKeyDown(e) { //permet de récupérer un évènement clavier, ici quand l'utilisateur enfonce une touche, capturer dans "e"
         
         var key = e.keyCode;//on récupère le code de cette touche dans la variable key
-        var newDirection;
+        var newDirection;//stockera la nouvelle direction
         switch(key){//test les différents cas et stock dans la variable newDirection
             case 37: newDirection = "left";
                 break;
@@ -83,7 +103,9 @@ window.onload = function() {
                 break;
             case 40 : newDirection = "down";
                 break;
+            default: return;
         }
+        kaa.setDirection(newDirection);
     }
 
 
