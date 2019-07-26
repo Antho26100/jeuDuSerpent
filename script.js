@@ -11,6 +11,7 @@ window.onload = function() {
     var widthInBlocks = canvasWidth/blockSize;//permet d'avoir la largeur en block
     var heightInBlocks = canvasHeight/blockSize;//idem pour la hauteur
     var score = 0;
+    var timeout;
 
     init();
 
@@ -36,8 +37,7 @@ window.onload = function() {
         kaa.advance();//fait avancer notre serpent, méthode du serpent
         if(kaa.checkCollision()){
             gameOver();
-        }
-        else{
+        } else {
 
             if(kaa.isEatingApple(api)){
                 kaa.ateApple = true;
@@ -51,7 +51,7 @@ window.onload = function() {
             drawScore();
             kaa.draw();//appel la méthode draw de l'objet kaa instancier de Snake
             api.draw();
-            setTimeout(refreshCanvas,delay);// fonction répétant refreshCanvas suivant la valeur delay
+            timeout = setTimeout(refreshCanvas,delay);// fonction répétant refreshCanvas suivant la valeur delay
         }
         
     }
@@ -85,6 +85,7 @@ window.onload = function() {
         kaa = new Snake ([[6,4],[5,4],[4,4]], "right");
         api = new Apple([10,10]);
         score = 0;
+        clearTimeout(timeout);
         refreshCanvas();
     }
 
