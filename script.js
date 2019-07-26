@@ -33,6 +33,14 @@ window.onload = function() {
 
         }
         else{
+
+            if(kaa.isEatingApple(api)){
+                kaa.ateApple = true;
+                do{
+                    api.setNewPosition();
+                }
+                while(api.isOnSnake(kaa))
+            }
             ctx.clearRect(0,0,canvas.width, canvas.height);//suppression du contexte
             kaa.draw();//appel la méthode draw de l'objet kaa instancier de Snake
             api.draw();
@@ -54,6 +62,7 @@ window.onload = function() {
 
         this.body = body;
         this.direction = direction;
+        this.ateApple = false;
         this.draw = function() { // fonction draw permettant de dessiner les blocs constituant le serpent
             ctx.save(); //sauvegarde le contexte
             ctx.fillStyle = "#ff0000";
@@ -78,7 +87,11 @@ window.onload = function() {
                 default: throw("invalid Direction");
             }
             this.body.unshift(nextPosition);//on rajoute la valeur de nextPosition avec la méthode unshift ([[7,4],[6,4],[5,4],[4,4]])
-            this.body.pop();//supprime le dernier élèment de notre tableau
+            if(!this.ateApple){
+                this.body.pop();//supprime le dernier élèment de notre tableau
+            } else { //ce else évite de pop la tableau, agrandissant donc le serpent
+                this.ateApple = false;
+            }
         };
 
         this.setDirection = function (newDirection){// va permettre de régler une direction
@@ -122,8 +135,14 @@ window.onload = function() {
                         snakeCollision = true;
                 }
             }
-            
             return wallCollision || snakeCollision;
+        }
+        this.isEatingApple = function(appleToEat) {//permet de savoir si le serpent à manger la pomme
+            var head = this.body[0];
+            if(head[0] === appleToEat.position[0] && head[1] === appleToEat.position[1])
+                return true;
+            else 
+                return false;
         }
     }
 
@@ -134,12 +153,25 @@ window.onload = function() {
             ctx.beginPath();
             ctx.fillStyle = "#33cc33";
             var radius = blockSize/2; //taille du rayon, soit la moitié d'un block
-            var x = position[0] * blockSize - radius;
-            var y = position[1] * blockSize - radius;
+            var x = this.position[0] * blockSize + radius;//on rajoute radius qui correspond à la moitié d'un bloc afin de se trouver au centre d'un bloc
+            var y = this.position[1] * blockSize + radius;
             ctx.arc(x,y,radius,0,Math.PI*2,true);//méthode afin de créer un cercle
             ctx.fill();
             ctx.restore();
-
+        }
+        this.setNewPosition = function() {// permet de paramètrer une nouvelle position à la pomme
+            var newX = Math.round(Math.random() * (widthInBlocks -1));
+            var newY = Math.round(Math.random() * (heightInBlocks -1));
+            this.position = [newX,newY];//tableau contenant la nouvelle position de la pomme
+        }
+        this.isOnSnake = function (snakeTocheck) {
+            var isOnSnake = false;
+            for(var i = 0; i < snakeTocheck.body.length; i++){
+                if(this.position[0] === snakeTocheck.body[i][0] && this.position[1] === snakeTocheck.body[i][1] ){
+                    isOnSnake = true;
+                }
+            }
+            return isOnSnake;
         }
 
     }
