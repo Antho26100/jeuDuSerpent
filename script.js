@@ -8,8 +8,9 @@ window.onload = function() {
     var delay = 100;//va permettre de fixer un temps de rafraîchissement
     var kaa;//objet, instance de Snake
     var api;
-    var widthInBlocks = canvasWidth/blockSize;
-    var heightInBlocks = canvasHeight/blockSize;
+    var widthInBlocks = canvasWidth/blockSize;//permet d'avoir la largeur en block
+    var heightInBlocks = canvasHeight/blockSize;//idem pour la hauteur
+    var score = 0;
 
     init();
 
@@ -23,6 +24,7 @@ window.onload = function() {
         ctx = canvas.getContext('2d');//notre canvas doit posséder un contexte, ici en 2d
         kaa = new Snake ([[6,4],[5,4],[4,4]], "right");//instance de Snack avec en paramètre le corps du serpent
         api = new Apple([10,10]);
+        score = 0;
         refreshCanvas();
     }
 
@@ -30,12 +32,13 @@ window.onload = function() {
 
         kaa.advance();//fait avancer notre serpent, méthode du serpent
         if(kaa.checkCollision()){
-
+            gameOver();
         }
         else{
 
             if(kaa.isEatingApple(api)){
                 kaa.ateApple = true;
+                score ++;
                 do{
                     api.setNewPosition();
                 }
@@ -44,6 +47,7 @@ window.onload = function() {
             ctx.clearRect(0,0,canvas.width, canvas.height);//suppression du contexte
             kaa.draw();//appel la méthode draw de l'objet kaa instancier de Snake
             api.draw();
+            drawScore();
             setTimeout(refreshCanvas,delay);// fonction répétant refreshCanvas suivant la valeur delay
         }
         
@@ -55,6 +59,26 @@ window.onload = function() {
         var y = position[1] * blockSize;//multiplie la position à l'index 1 par la taille d'un bloc fixé à 30
         ctx.fillRect(x, y, blockSize, blockSize);//on dessine ds le contexte un carré à la position x et y et de taille 30sur30
     }                                              //la succession de nos 3 carrés formeront un rectangle correspondant à notre serpent
+
+    function gameOver(){//affiche le Game Over
+        ctx.save();
+        ctx.fillText("Game Over",5,15);
+        ctx.fillText("Appuyer sur espace pour rejouer",5,30);
+        ctx.restore();
+    }
+
+    function restart() {//permet de recommencer une partie
+        kaa = new Snake ([[6,4],[5,4],[4,4]], "right");
+        api = new Apple([10,10]);
+        score = 0;
+        refreshCanvas();
+    }
+
+    function drawScore(){//dessine le score
+        ctx.save();
+        ctx.fillText(score.toString(),5,canvasHeight - 5);
+        ctx.restore();
+    }
     
 
     //fonction constructeur qui permet d'instancier un objet serpent, prend 1 paramètre qui est le corps du serpent[un tableau]
@@ -164,7 +188,7 @@ window.onload = function() {
             var newY = Math.round(Math.random() * (heightInBlocks -1));
             this.position = [newX,newY];//tableau contenant la nouvelle position de la pomme
         }
-        this.isOnSnake = function (snakeTocheck) {
+        this.isOnSnake = function (snakeTocheck) {//vérifie que la pomme ne se créer par sur le serpent
             var isOnSnake = false;
             for(var i = 0; i < snakeTocheck.body.length; i++){
                 if(this.position[0] === snakeTocheck.body[i][0] && this.position[1] === snakeTocheck.body[i][1] ){
@@ -189,6 +213,8 @@ window.onload = function() {
                 break;
             case 40 : newDirection = "down";
                 break;
+            case 32 : restart();
+                     return;  
             default: return;
         }
         kaa.setDirection(newDirection);//appel de la fonction setDirection de l'objet kaa
