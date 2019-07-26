@@ -19,7 +19,10 @@ window.onload = function() {
         canvas = document.createElement('canvas');//création de l'élèment canvas
         canvas.width = canvasWidth;
         canvas.height = canvasHeight;
-        canvas.style.border = "1px solid";
+        canvas.style.border = "30px solid gray";
+        canvas.style.margin = "50px auto";
+        canvas.style.display = "block";
+        canvas.style.backgroundColor = "#ddd";
         document.body.appendChild(canvas);//accroche le canvas au document  
         ctx = canvas.getContext('2d');//notre canvas doit posséder un contexte, ici en 2d
         kaa = new Snake ([[6,4],[5,4],[4,4]], "right");//instance de Snack avec en paramètre le corps du serpent
@@ -45,9 +48,9 @@ window.onload = function() {
                 while(api.isOnSnake(kaa))
             }
             ctx.clearRect(0,0,canvas.width, canvas.height);//suppression du contexte
+            drawScore();
             kaa.draw();//appel la méthode draw de l'objet kaa instancier de Snake
             api.draw();
-            drawScore();
             setTimeout(refreshCanvas,delay);// fonction répétant refreshCanvas suivant la valeur delay
         }
         
@@ -62,8 +65,19 @@ window.onload = function() {
 
     function gameOver(){//affiche le Game Over
         ctx.save();
-        ctx.fillText("Game Over",5,15);
-        ctx.fillText("Appuyer sur espace pour rejouer",5,30);
+        ctx.font = "bold 80px sans-serif";
+        ctx.fillStyle = "#000";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 5;
+        var centreX = canvasWidth / 2;
+        var centreY = canvasHeight / 2;
+        ctx.strokeText("Game Over",centreX,centreY - 180);
+        ctx.fillText("Game Over",centreX,centreY - 180);
+        ctx.font = "bold 35px sans-serif";
+        ctx.strokeText("Appuyer sur espace pour rejouer",centreX,centreY + 180);
+        ctx.fillText("Appuyer sur espace pour rejouer",centreX,centreY + 180);
         ctx.restore();
     }
 
@@ -76,7 +90,13 @@ window.onload = function() {
 
     function drawScore(){//dessine le score
         ctx.save();
-        ctx.fillText(score.toString(),5,canvasHeight - 5);
+        ctx.font = "bold 200px sans-serif";
+        ctx.fillStyle = "gray";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        var centreX = canvasWidth / 2;
+        var centreY = canvasHeight / 2;
+        ctx.fillText(score.toString(), centreX, centreY);
         ctx.restore();
     }
     
