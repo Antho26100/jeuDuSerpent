@@ -100,12 +100,15 @@ window.onload = () => {
         ctx.restore();
     }
     
-    function Snake(body, direction) {
+    class Snake {
 
-        this.body = body;
-        this.direction = direction;
-        this.ateApple = false;
-        this.draw = () => { 
+        constructor(body, direction){
+            this.body = body;
+            this.direction = direction;
+            this.ateApple = false;
+        }
+        
+        draw() { 
             ctx.save(); 
             ctx.fillStyle = "#ff0000";
             for(let i = 0; i < this.body.length; i ++){ 
@@ -114,7 +117,7 @@ window.onload = () => {
             ctx.restore();    
         }
 
-        this.advance = function () {
+        advance() {
             const nextPosition = this.body[0].slice();
             switch(this.direction){ 
                 case "left": nextPosition[0] -= 1;
@@ -135,7 +138,7 @@ window.onload = () => {
             }
         };
 
-        this.setDirection = function (newDirection){
+        setDirection(newDirection){
             let allowedDirection; 
             switch(this.direction){
                 case "left": 
@@ -152,9 +155,9 @@ window.onload = () => {
                 this.direction = newDirection;               
             }
 
-        }
+        };
 
-        this.checkCollision = function() {
+        checkCollision() {
             let wallCollision = false;
             let snakeCollision = false;
             const head = this.body[0];
@@ -177,19 +180,24 @@ window.onload = () => {
                 }
             }
             return wallCollision || snakeCollision;
-        }
-        this.isEatingApple = function(appleToEat) {//permet de savoir si le serpent à manger la pomme
+        };
+
+        isEatingApple(appleToEat) {
             let head = this.body[0];
             if(head[0] === appleToEat.position[0] && head[1] === appleToEat.position[1])
                 return true;
             else 
                 return false;
-        }
+        };
     }
 
-    function Apple(position) { 
-        this.position = position;
-        this.draw = () => { 
+    class Apple { 
+
+        constructor(position){
+            this.position = position;
+        }
+        
+        draw() { 
             ctx.save();
             ctx.beginPath();
             ctx.fillStyle = "#33cc33";
@@ -200,12 +208,12 @@ window.onload = () => {
             ctx.fill();
             ctx.restore();
         }
-        this.setNewPosition = () => {
+        setNewPosition() {
             const newX = Math.round(Math.random() * (widthInBlocks -1));
             const newY = Math.round(Math.random() * (heightInBlocks -1));
             this.position = [newX,newY];
         }
-        this.isOnSnake = snakeTocheck => {
+        isOnSnake(snakeTocheck){
             let isOnSnake = false;
             for(let i = 0; i < snakeTocheck.body.length; i++){
                 if(this.position[0] === snakeTocheck.body[i][0] && this.position[1] === snakeTocheck.body[i][1] ){
