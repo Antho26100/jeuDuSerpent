@@ -1,4 +1,4 @@
-window.onload = function() {
+window.onload = () => {
     
     const canvasWidth = 900;
     const canvasHeight = 600;
@@ -15,9 +15,7 @@ window.onload = function() {
     let score;
     let timeout;
 
-    init();
-
-    function init() {
+    const init = () => {
         
         canvas.width = canvasWidth;
         canvas.height = canvasHeight;
@@ -25,14 +23,20 @@ window.onload = function() {
         canvas.style.margin = "50px auto";
         canvas.style.display = "block";
         canvas.style.backgroundColor = "#ddd";
-        document.body.appendChild(canvas);//accroche le canvas au document  
-        kaa = new Snake ([[6,4],[5,4],[4,4]], "right");//instance de Snack avec en paramètre le corps du serpent
+        document.body.appendChild(canvas); 
+        launch();
+    }
+
+    const launch = () => {
+        kaa = new Snake ([[6,4],[5,4],[4,4]], "right");
         api = new Apple([10,10]);
         score = 0;
+        clearTimeout(timeout);
+        delay = 100;
         refreshCanvas();
     }
 
-    function refreshCanvas() {
+    const refreshCanvas = () => {
 
         kaa.advance();//fait avancer notre serpent, méthode du serpent
         if(kaa.checkCollision()){
@@ -60,18 +64,18 @@ window.onload = function() {
         
     }
 
-    function speedUp() {
+    const speedUp = () => {
         delay/=2;
     }
 
-    function drawBlock(ctx, position) { 
+    const drawBlock = (ctx, position) => { 
                                       
         const x = position[0] * blockSize;
         const y = position[1] * blockSize;
         ctx.fillRect(x, y, blockSize, blockSize);
     }                                             
 
-    function gameOver(){
+    const gameOver = () => {
         ctx.save();
         ctx.font = "bold 80px sans-serif";
         ctx.fillStyle = "#000";
@@ -86,16 +90,7 @@ window.onload = function() {
         ctx.restore();
     }
 
-    function restart() {
-        kaa = new Snake ([[6,4],[5,4],[4,4]], "right");
-        api = new Apple([10,10]);
-        score = 0;
-        clearTimeout(timeout);
-        delay = 100;
-        refreshCanvas();
-    }
-
-    function drawScore(){
+    const drawScore = () => {
         ctx.save();
         ctx.font = "bold 200px sans-serif";
         ctx.fillStyle = "gray";
@@ -105,12 +100,12 @@ window.onload = function() {
         ctx.restore();
     }
     
-    function Snake(body, direction){
+    function Snake(body, direction) {
 
         this.body = body;
         this.direction = direction;
         this.ateApple = false;
-        this.draw = function() { 
+        this.draw = () => { 
             ctx.save(); 
             ctx.fillStyle = "#ff0000";
             for(let i = 0; i < this.body.length; i ++){ 
@@ -132,16 +127,16 @@ window.onload = function() {
                     break;
                 default: throw("invalid Direction");
             }
-            this.body.unshift(nextPosition);//on rajoute la valeur de nextPosition avec la méthode unshift ([[7,4],[6,4],[5,4],[4,4]])
+            this.body.unshift(nextPosition);
             if(!this.ateApple){
-                this.body.pop();//supprime le dernier élèment de notre tableau
-            } else { //ce else évite de pop la tableau, agrandissant donc le serpent
+                this.body.pop();
+            } else { 
                 this.ateApple = false;
             }
         };
 
-        this.setDirection = function (newDirection){// va permettre de régler une direction
-            let allowedDirection; //va stocker un tableau de directions autorisées à 2 index
+        this.setDirection = function (newDirection){
+            let allowedDirection; 
             switch(this.direction){
                 case "left": 
                 case "right": 
@@ -153,20 +148,20 @@ window.onload = function() {
                     break;
                 default: throw("invalid Direction");
             }
-            if(allowedDirection.indexOf(newDirection) > -1){ // la méthode indexOf premet de vérifier si une valeur est contenu dans un tableau, si elle ne l'est pas...
-                this.direction = newDirection;               // ...la valuer retourné est -1 et nous ne rentrerons pas dans la condition
+            if(allowedDirection.indexOf(newDirection) > -1){ 
+                this.direction = newDirection;               
             }
 
         }
 
-        this.checkCollision = function() {//méthode permettant de savoir si il y a une collision
+        this.checkCollision = function() {
             let wallCollision = false;
             let snakeCollision = false;
             const head = this.body[0];
             const rest = this.body.slice(1);
             const headX = head[0];
             const headY = head[1];
-            const maxX = widthInBlocks - 1; //permet de définir un bloc maximum sur l'axe des abscisses
+            const maxX = widthInBlocks - 1; 
             const minX = 0; // permet de définir un bloc minimum sur l'axe des abscisses
             const maxY = heightInBlocks - 1; // idem pour les ordonnées
             const minY = 0;
@@ -192,25 +187,25 @@ window.onload = function() {
         }
     }
 
-    function Apple (position){ // fonction constructeur de pomme, prend en paramètre une position sous frome de tableau
+    function Apple(position) { 
         this.position = position;
-        this.draw = function() { 
+        this.draw = () => { 
             ctx.save();
             ctx.beginPath();
             ctx.fillStyle = "#33cc33";
-            const radius = blockSize/2; //taille du rayon, soit la moitié d'un block
-            const x = this.position[0] * blockSize + radius;//on rajoute radius qui correspond à la moitié d'un bloc afin de se trouver au centre d'un bloc
+            const radius = blockSize/2; 
+            const x = this.position[0] * blockSize + radius;
             const y = this.position[1] * blockSize + radius;
-            ctx.arc(x,y,radius,0,Math.PI*2,true);//méthode afin de créer un cercle
+            ctx.arc(x,y,radius,0,Math.PI*2,true);
             ctx.fill();
             ctx.restore();
         }
-        this.setNewPosition = function() {// permet de paramètrer une nouvelle position à la pomme
+        this.setNewPosition = () => {
             const newX = Math.round(Math.random() * (widthInBlocks -1));
             const newY = Math.round(Math.random() * (heightInBlocks -1));
-            this.position = [newX,newY];//tableau contenant la nouvelle position de la pomme
+            this.position = [newX,newY];
         }
-        this.isOnSnake = function (snakeTocheck) {//vérifie que la pomme ne se créer par sur le serpent
+        this.isOnSnake = snakeTocheck => {
             let isOnSnake = false;
             for(let i = 0; i < snakeTocheck.body.length; i++){
                 if(this.position[0] === snakeTocheck.body[i][0] && this.position[1] === snakeTocheck.body[i][1] ){
@@ -222,11 +217,11 @@ window.onload = function() {
 
     }
 
-    document.onkeydown = function handleKeyDown(e) { //permet de récupérer un évènement clavier, ici quand l'utilisateur enfonce une touche, capturer dans "e"
+    document.onkeydown =  (e) => { 
         
-        const key = e.keyCode;//on récupère le code de cette touche dans la variable key
-        let newDirection;//stockera la nouvelle direction
-        switch(key){//test les différents cas et stock dans la variable newDirection
+        const key = e.keyCode;
+        let newDirection;
+        switch(key){
             case 37: newDirection = "left";
                 break;
             case 38 : newDirection = "up";
@@ -235,12 +230,14 @@ window.onload = function() {
                 break;
             case 40 : newDirection = "down";
                 break;
-            case 32 : restart();
+            case 32 : launch();
                      return;  
             default: return;
         }
-        kaa.setDirection(newDirection);//appel de la fonction setDirection de l'objet kaa
+        kaa.setDirection(newDirection);
     }
+
+    init();
 
 
 
