@@ -15,94 +15,9 @@ window.onload = () => {
     let score;
     let timeout;
 
-    const init = () => {
-        
-        canvas.width = canvasWidth;
-        canvas.height = canvasHeight;
-        canvas.style.border = "30px solid gray";
-        canvas.style.margin = "50px auto";
-        canvas.style.display = "block";
-        canvas.style.backgroundColor = "#ddd";
-        document.body.appendChild(canvas); 
-        launch();
-    }
-
-    const launch = () => {
-        kaa = new Snake ([[6,4],[5,4],[4,4]], "right");
-        api = new Apple([10,10]);
-        score = 0;
-        clearTimeout(timeout);
-        delay = 100;
-        refreshCanvas();
-    }
-
-    const refreshCanvas = () => {
-
-        kaa.advance();//fait avancer notre serpent, méthode du serpent
-        if(kaa.checkCollision()){
-            gameOver();
-        } else {
-
-            if(kaa.isEatingApple(api)){
-                kaa.ateApple = true;
-                score ++;
-                do{
-                    api.setNewPosition();
-                }
-                while(api.isOnSnake(kaa));
-
-                if(score % 5 == 0){
-                    speedUp();
-                }
-            }
-            ctx.clearRect(0,0,canvas.width, canvas.height);//suppression du contexte
-            drawScore();
-            kaa.draw();//appel la méthode draw de l'objet kaa instancier de Snake
-            api.draw();
-            timeout = setTimeout(refreshCanvas,delay);// fonction répétant refreshCanvas suivant la valeur delay
-        }
-        
-    }
-
-    const speedUp = () => {
-        delay/=2;
-    }
-
-    const drawBlock = (ctx, position) => { 
-                                      
-        const x = position[0] * blockSize;
-        const y = position[1] * blockSize;
-        ctx.fillRect(x, y, blockSize, blockSize);
-    }                                             
-
-    const gameOver = () => {
-        ctx.save();
-        ctx.font = "bold 80px sans-serif";
-        ctx.fillStyle = "#000";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.strokeStyle = "white";
-        ctx.strokeText("Game Over",centreX,centreY - 180);
-        ctx.fillText("Game Over",centreX,centreY - 180);
-        ctx.font = "bold 35px sans-serif";
-        ctx.strokeText("Appuyer sur espace pour rejouer",centreX,centreY + 180);
-        ctx.fillText("Appuyer sur espace pour rejouer",centreX,centreY + 180);
-        ctx.restore();
-    }
-
-    const drawScore = () => {
-        ctx.save();
-        ctx.font = "bold 200px sans-serif";
-        ctx.fillStyle = "gray";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(score.toString(), centreX, centreY);
-        ctx.restore();
-    }
-    
     class Snake {
-
-        constructor(body, direction){
+   
+        constructor(direction, ...body){
             this.body = body;
             this.direction = direction;
             this.ateApple = false;
@@ -111,8 +26,8 @@ window.onload = () => {
         draw() { 
             ctx.save(); 
             ctx.fillStyle = "#ff0000";
-            for(let i = 0; i < this.body.length; i ++){ 
-                drawBlock(ctx,this.body[i])
+            for(let block of this.body){ 
+                drawBlock(ctx,block)
             }
             ctx.restore();    
         }
@@ -160,22 +75,20 @@ window.onload = () => {
         checkCollision() {
             let wallCollision = false;
             let snakeCollision = false;
-            const head = this.body[0];
-            const rest = this.body.slice(1);
-            const headX = head[0];
-            const headY = head[1];
+            const [head,...rest] = this.body;
+            const [headX,headY] = head;
             const maxX = widthInBlocks - 1; 
-            const minX = 0; // permet de définir un bloc minimum sur l'axe des abscisses
-            const maxY = heightInBlocks - 1; // idem pour les ordonnées
+            const minX = 0; 
+            const maxY = heightInBlocks - 1; 
             const minY = 0;
-            const isNotBetweenHorizontalWall = headX < minX || headX > maxX; //stocke dans cette variable la condition dans laquelle le serpent n'est pas entre les murs horizontaux
-            const isNotBetweenVerticalWall = headY < minY || headY > maxY; // pour les murs verticaux
+            const isNotBetweenHorizontalWall = headX < minX || headX > maxX; 
+            const isNotBetweenVerticalWall = headY < minY || headY > maxY; 
 
             if(isNotBetweenHorizontalWall || isNotBetweenVerticalWall){
                     wallCollision = true;
             }  
-            for(let i = 0; i < rest.length; i++){ //parcours du tableau rest correspondant au corps du serpent
-                if(headX === rest[i][0] && headY === rest[i][1]){ //si les pts x et y de notre serpent correspondent à ceux d'un des blocs du serpent, il y a snakeCollision
+            for(let block of rest){ 
+                if(headX === block[0] && headY === block[1]){
                         snakeCollision = true;
                 }
             }
@@ -193,7 +106,7 @@ window.onload = () => {
 
     class Apple { 
 
-        constructor(position){
+        constructor(position = [10,10]){
             this.position = position;
         }
         
@@ -215,8 +128,8 @@ window.onload = () => {
         }
         isOnSnake(snakeTocheck){
             let isOnSnake = false;
-            for(let i = 0; i < snakeTocheck.body.length; i++){
-                if(this.position[0] === snakeTocheck.body[i][0] && this.position[1] === snakeTocheck.body[i][1] ){
+            for(let block of snakeTocheck.body){
+                if(this.position[0] === block[0] && this.position[1] === block[1] ){
                     isOnSnake = true;
                 }
             }
@@ -225,7 +138,91 @@ window.onload = () => {
 
     }
 
-    document.onkeydown =  (e) => { 
+    const init = () => {
+        
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+        canvas.style.border = "30px solid gray";
+        canvas.style.margin = "50px auto";
+        canvas.style.display = "block";
+        canvas.style.backgroundColor = "#ddd";
+        document.body.appendChild(canvas); 
+        launch();
+    }
+
+    const launch = () => {
+        kaa = new Snake ( "right",[6,4],[5,4],[4,4]);
+        api = new Apple();
+        score = 0;
+        clearTimeout(timeout);
+        delay = 100;
+        refreshCanvas();
+    }
+
+    const refreshCanvas = () => {
+
+        kaa.advance();//fait avancer notre serpent, méthode du serpent
+        if(kaa.checkCollision()){
+            gameOver();
+        } else {
+
+            if(kaa.isEatingApple(api)){
+                kaa.ateApple = true;
+                score ++;
+                do{
+                    api.setNewPosition();
+                }
+                while(api.isOnSnake(kaa));
+
+                if(score % 5 == 0){
+                    speedUp();
+                }
+            }
+            ctx.clearRect(0,0,canvas.width, canvas.height);//suppression du contexte
+            drawScore();
+            kaa.draw();//appel la méthode draw de l'objet kaa instancier de Snake
+            api.draw();
+            timeout = setTimeout(refreshCanvas,delay);// fonction répétant refreshCanvas suivant la valeur delay
+        }
+        
+    }
+
+    const speedUp = () => {
+        delay/=2;
+    }
+
+    const drawBlock = (ctx, position) => { 
+                                      
+        const[x,y] = position;
+        ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
+    }                                             
+
+    const gameOver = () => {
+        ctx.save();
+        ctx.font = "bold 80px sans-serif";
+        ctx.fillStyle = "#000";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.strokeStyle = "white";
+        ctx.strokeText("Game Over",centreX,centreY - 180);
+        ctx.fillText("Game Over",centreX,centreY - 180);
+        ctx.font = "bold 35px sans-serif";
+        ctx.strokeText("Appuyer sur espace pour rejouer",centreX,centreY + 180);
+        ctx.fillText("Appuyer sur espace pour rejouer",centreX,centreY + 180);
+        ctx.restore();
+    }
+
+    const drawScore = () => {
+        ctx.save();
+        ctx.font = "bold 200px sans-serif";
+        ctx.fillStyle = "gray";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(score.toString(), centreX, centreY);
+        ctx.restore();
+    }
+    
+    document.onkeydown = (e) => { 
         
         const key = e.keyCode;
         let newDirection;
