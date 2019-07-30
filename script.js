@@ -1,9 +1,9 @@
 window.onload = () => {
     
+    const canvas = document.createElement('canvas');
     const canvasWidth = 900;
     const canvasHeight = 600;
     const blockSize = 30;
-    const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const widthInBlocks = canvasWidth/blockSize;
     const heightInBlocks = canvasHeight/blockSize;
@@ -21,15 +21,6 @@ window.onload = () => {
             this.body = body;
             this.direction = direction;
             this.ateApple = false;
-        }
-        
-        draw() { 
-            ctx.save(); 
-            ctx.fillStyle = "#ff0000";
-            for(let block of this.body){ 
-                drawBlock(ctx,block)
-            }
-            ctx.restore();    
         }
 
         advance() {
@@ -110,17 +101,6 @@ window.onload = () => {
             this.position = position;
         }
         
-        draw() { 
-            ctx.save();
-            ctx.beginPath();
-            ctx.fillStyle = "#33cc33";
-            const radius = blockSize/2; 
-            const x = this.position[0] * blockSize + radius;
-            const y = this.position[1] * blockSize + radius;
-            ctx.arc(x,y,radius,0,Math.PI*2,true);
-            ctx.fill();
-            ctx.restore();
-        }
         setNewPosition() {
             const newX = Math.round(Math.random() * (widthInBlocks -1));
             const newY = Math.round(Math.random() * (heightInBlocks -1));
@@ -138,6 +118,60 @@ window.onload = () => {
 
     }
 
+    class Drawing { // class regroupant toutes les méthodes liées au dessin
+        //création de méthodes static afin d'éviter d'instancier un objet
+        static gameOver(ctx, centreX, centreY) {
+            ctx.save();
+            ctx.font = "bold 80px sans-serif";
+            ctx.fillStyle = "#000";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.strokeStyle = "white";
+            ctx.strokeText("Game Over",centreX,centreY - 180);
+            ctx.fillText("Game Over",centreX,centreY - 180);
+            ctx.font = "bold 35px sans-serif";
+            ctx.strokeText("Appuyer sur espace pour rejouer",centreX,centreY + 180);
+            ctx.fillText("Appuyer sur espace pour rejouer",centreX,centreY + 180);
+            ctx.restore();
+        }
+
+        static drawScore(ctx, centreX, centreY, score) {
+            ctx.save();
+            ctx.font = "bold 200px sans-serif";
+            ctx.fillStyle = "gray";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(score.toString(), centreX, centreY);
+            ctx.restore();
+        }
+
+        static drawBlock(ctx, position, blockSize) {                                      
+            const[x,y] = position;//destructuring de Array
+            ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
+        }        
+        
+        static drawSnake(ctx, blockSize, snake) { 
+            ctx.save(); 
+            ctx.fillStyle = "#ff0000";
+            for(let block of snake.body){ 
+                this.drawBlock(ctx, block, blockSize);
+            }
+            ctx.restore();    
+        }
+
+        static drawApple(ctx, blockSize, apple) { 
+            ctx.save();
+            ctx.beginPath();
+            ctx.fillStyle = "#33cc33";
+            const radius = blockSize/2; 
+            const x = apple.position[0] * blockSize + radius;
+            const y = apple.position[1] * blockSize + radius;
+            ctx.arc(x,y,radius,0,Math.PI*2,true);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+    
     const init = () => {
         
         canvas.width = canvasWidth;
@@ -161,9 +195,9 @@ window.onload = () => {
 
     const refreshCanvas = () => {
 
-        kaa.advance();//fait avancer notre serpent, méthode du serpent
+        kaa.advance();
         if(kaa.checkCollision()){
-            gameOver();
+            Drawing.gameOver(ctx, centreX,centreY);//méthode static de la classe drawing
         } else {
 
             if(kaa.isEatingApple(api)){
@@ -178,11 +212,11 @@ window.onload = () => {
                     speedUp();
                 }
             }
-            ctx.clearRect(0,0,canvas.width, canvas.height);//suppression du contexte
-            drawScore();
-            kaa.draw();//appel la méthode draw de l'objet kaa instancier de Snake
-            api.draw();
-            timeout = setTimeout(refreshCanvas,delay);// fonction répétant refreshCanvas suivant la valeur delay
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            Drawing.drawScore(ctx, centreX, centreY, score);
+            Drawing.drawSnake(ctx, blockSize, kaa);
+            Drawing.drawApple(ctx, blockSize, api);
+            timeout = setTimeout(refreshCanvas,delay);
         }
         
     }
@@ -191,37 +225,6 @@ window.onload = () => {
         delay/=2;
     }
 
-    const drawBlock = (ctx, position) => { 
-                                      
-        const[x,y] = position;
-        ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
-    }                                             
-
-    const gameOver = () => {
-        ctx.save();
-        ctx.font = "bold 80px sans-serif";
-        ctx.fillStyle = "#000";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.strokeStyle = "white";
-        ctx.strokeText("Game Over",centreX,centreY - 180);
-        ctx.fillText("Game Over",centreX,centreY - 180);
-        ctx.font = "bold 35px sans-serif";
-        ctx.strokeText("Appuyer sur espace pour rejouer",centreX,centreY + 180);
-        ctx.fillText("Appuyer sur espace pour rejouer",centreX,centreY + 180);
-        ctx.restore();
-    }
-
-    const drawScore = () => {
-        ctx.save();
-        ctx.font = "bold 200px sans-serif";
-        ctx.fillStyle = "gray";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(score.toString(), centreX, centreY);
-        ctx.restore();
-    }
-    
     document.onkeydown = (e) => { 
         
         const key = e.keyCode;
@@ -243,11 +246,12 @@ window.onload = () => {
     }
 
     init();
-
-
-
-
 }
+
+
+
+
+
 
 
     
