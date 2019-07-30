@@ -1,19 +1,74 @@
 window.onload = () => {
     
-    const canvas = document.createElement('canvas');
-    const canvasWidth = 900;
-    const canvasHeight = 600;
-    const blockSize = 30;
-    const ctx = canvas.getContext('2d');
-    const widthInBlocks = canvasWidth/blockSize;
-    const heightInBlocks = canvasHeight/blockSize;
-    const centreX = canvasWidth / 2;
-    const centreY = canvasHeight / 2;
-    let delay = 100;
-    let kaa;
-    let api;
-    let score;
-    let timeout;
+    class Game {
+
+        constructor(canvasWidth = 900, canvasHeight = 600){
+            this.canvas = document.createElement('canvas');
+            this.canvasWidth = canvasWidth;
+            this.canvasHeight = canvasHeight;
+            this.blockSize = 30;
+            this.ctx = this.canvas.getContext('2d');
+            this.widthInBlocks = this.canvasWidth/this.blockSize;
+            this.heightInBlocks = this.canvasHeight/this.blockSize;
+            this.centreX = this.canvasWidth / 2;
+            this.centreY = this.canvasHeight / 2;
+            this.delay = 100;
+            this.kaa;
+            this.api;
+            this.score;
+            this.timeout;
+        }
+        
+        init() {
+            this.canvas.width = this.canvasWidth;
+            this.canvas.height = this.canvasHeight;
+            this.canvas.style.border = "30px solid gray";
+            this.canvas.style.margin = "50px auto";
+            this.canvas.style.display = "block";
+            this.canvas.style.backgroundColor = "#ddd";
+            document.body.appendChild(this.canvas); 
+            this.launch();
+        }
+    
+        launch() {
+            this.kaa = new Snake ( "right",[6,4],[5,4],[4,4]);
+            this.api = new Apple();
+            this.score = 0;
+            clearTimeout(this.timeout);
+            this.delay = 100;
+            this.refreshCanvas();
+        }
+    
+        refreshCanvas() {
+    
+            this.kaa.advance();
+            if(this.kaa.checkCollision(this.widthInBlocks, this.heightInBlocks)){
+                Drawing.gameOver(this.ctx, this.centreX,this.centreY);//méthode static de la classe drawing
+            } else {    
+                if(this.kaa.isEatingApple(this.api)){
+                    this.kaa.ateApple = true;
+                    this.score ++;
+                    do{
+                        this.api.setNewPosition(this.widthInBlocks, this.heightInBlocks);
+                    }
+                    while(this.api.isOnSnake(this.kaa));
+    
+                    if(this.score % 5 == 0){
+                        this.speedUp();
+                    }
+                }
+                this.ctx.clearRect(0,0,this.canvas.width, this.canvas.height);
+                Drawing.drawScore(this.ctx, this.centreX, this.centreY, this.score);
+                Drawing.drawSnake(this.ctx, this.blockSize, this.kaa);
+                Drawing.drawApple(this.ctx, this.blockSize, this.api);
+                this.timeout = setTimeout(this.refreshCanvas.bind(this),this.delay);// on relie le this avec le mot clef bind sinon serait éxecuté dans le contexte global
+            }      
+        }
+    
+        speedUp() {
+            this.delay/=2;
+        }
+    }
 
     class Snake {
    
@@ -63,7 +118,7 @@ window.onload = () => {
 
         };
 
-        checkCollision() {
+        checkCollision(widthInBlocks, heightInBlocks) {
             let wallCollision = false;
             let snakeCollision = false;
             const [head,...rest] = this.body;
@@ -101,11 +156,12 @@ window.onload = () => {
             this.position = position;
         }
         
-        setNewPosition() {
+        setNewPosition(widthInBlocks, heightInBlocks) {
             const newX = Math.round(Math.random() * (widthInBlocks -1));
             const newY = Math.round(Math.random() * (heightInBlocks -1));
             this.position = [newX,newY];
         }
+
         isOnSnake(snakeTocheck){
             let isOnSnake = false;
             for(let block of snakeTocheck.body){
@@ -172,58 +228,8 @@ window.onload = () => {
         }
     }
     
-    const init = () => {
-        
-        canvas.width = canvasWidth;
-        canvas.height = canvasHeight;
-        canvas.style.border = "30px solid gray";
-        canvas.style.margin = "50px auto";
-        canvas.style.display = "block";
-        canvas.style.backgroundColor = "#ddd";
-        document.body.appendChild(canvas); 
-        launch();
-    }
-
-    const launch = () => {
-        kaa = new Snake ( "right",[6,4],[5,4],[4,4]);
-        api = new Apple();
-        score = 0;
-        clearTimeout(timeout);
-        delay = 100;
-        refreshCanvas();
-    }
-
-    const refreshCanvas = () => {
-
-        kaa.advance();
-        if(kaa.checkCollision()){
-            Drawing.gameOver(ctx, centreX,centreY);//méthode static de la classe drawing
-        } else {
-
-            if(kaa.isEatingApple(api)){
-                kaa.ateApple = true;
-                score ++;
-                do{
-                    api.setNewPosition();
-                }
-                while(api.isOnSnake(kaa));
-
-                if(score % 5 == 0){
-                    speedUp();
-                }
-            }
-            ctx.clearRect(0,0,canvas.width, canvas.height);
-            Drawing.drawScore(ctx, centreX, centreY, score);
-            Drawing.drawSnake(ctx, blockSize, kaa);
-            Drawing.drawApple(ctx, blockSize, api);
-            timeout = setTimeout(refreshCanvas,delay);
-        }
-        
-    }
-
-    const speedUp = () => {
-        delay/=2;
-    }
+    let myGame = new Game();
+    myGame.init();
 
     document.onkeydown = (e) => { 
         
@@ -238,14 +244,14 @@ window.onload = () => {
                 break;
             case 40 : newDirection = "down";
                 break;
-            case 32 : launch();
+            case 32 : myGame.launch();
                      return;  
             default: return;
         }
-        kaa.setDirection(newDirection);
+        myGame.kaa.setDirection(newDirection);
     }
 
-    init();
+    
 }
 
 
