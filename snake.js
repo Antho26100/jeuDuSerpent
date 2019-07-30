@@ -40,7 +40,7 @@ export default class Snake {
                 break;
             default: throw("invalid Direction");
         }
-        if(allowedDirection.indexOf(newDirection) > -1){ 
+        if(allowedDirection.includes(newDirection)){ 
             this.direction = newDirection;               
         }
 
